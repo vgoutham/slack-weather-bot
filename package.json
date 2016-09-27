@@ -8,5 +8,10 @@
   },
   "keywords": [],
   "author": "Goutham V. Reddy",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.6.4",
+    "querystring": "^0.2.0",
+    "superagent": "^2.3.0"
+  }
 }
