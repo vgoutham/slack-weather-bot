@@ -1,0 +1,12 @@
+{
+  "name": "weather-bot",
+  "version": "1.0.0",
+  "description": "Slack bot that provides users with weather forecasts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Goutham V. Reddy",
+  "license": "MIT"
+}
