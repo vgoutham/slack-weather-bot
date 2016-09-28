@@ -21,17 +21,16 @@ function processEvent(event, callback) {
     const command = params.command;
     const channel = params.channel_name;
     const commandText = params.text.replace(/ /g,"%20");
+    let formattedLocation;
 
     request
-      .get(`http://api.openweathermap.org/data/2.5/forecast/daily?q=${commandText}&mode=json&units=imperial&cnt=7&appid=${weatherAPIKey}`)
+      .get(`http://maps.googleapis.com/maps/api/geocode/json?address=${commandText}`)
       .end(function(err, res){
-          // Do something
-          callback(null, res);
+        formattedLocation = res.body.results[0].formatted_address;
+        callback(null, `*5 Day Forecast for ${formattedLocation}*`);
       });
 
-    //callback(null, `${user} invoked ${command} in ${channel} with the following text: ${commandText}`);
 }
-
 
 exports.handler = (event, context, callback) => {
     const done = (err, res) => callback(null, {
