@@ -2,7 +2,7 @@
 
 const AWS = require('aws-sdk');
 const qs = require('querystring');
-const request = require('superagent');
+const request = require('request-promise');
 const config = require('./config');
 
 const kmsEncryptedToken = config.kmsEncryptedToken;
@@ -22,12 +22,23 @@ function processEvent(event, callback) {
     const channel = params.channel_name;
     const commandText = params.text.replace(/ /g,"%20");
     let formattedLocation;
+    let geolocation;
 
-    request
-      .get(`http://maps.googleapis.com/maps/api/geocode/json?address=${commandText}`)
-      .end(function(err, res){
-        formattedLocation = res.body.results[0].formatted_address;
-        callback(null, `*5 Day Forecast for ${formattedLocation}*`);
+    request(`http://maps.googleapis.com/maps/api/geocode/json?address=${commandText}`)
+      .then(function(res){
+        formattedLocation = JSON.parse(res).results[0].formatted_address;
+        geolocation = JSON.parse(res).results[0].geometry.location;
+        return request(`https://api.darksky.net/forecast/${weatherAPIKey}/${geolocation.lat},${geolocation.lng}`);
+      })
+      .then(function(res){
+        const currentWeather = JSON.parse(res).currently;
+        let responseText = `*${currentWeather.summary} in ${formattedLocation}*\n\n`;
+        responseText += ":thermometer:*Temperature:* " + parseInt(currentWeather.temperature) + " F\n";
+        responseText += ":umbrella_with_rain_drops:*Precipitation:* " + parseInt(currentWeather.precipProbability * 100) + "%\n";
+        responseText += ":sweat_drops:*Humidity:* " + parseInt(currentWeather.humidity * 100) + "%\n";
+        responseText += ":wind_blowing_face:*Wind:* " + currentWeather.windSpeed.toFixed(1) + " mph\n";
+        responseText += ":compression:*Pressure:* " + parseInt(currentWeather.pressure) + " mb\n";
+        callback(null, {"response_type": "in_channel", "text": responseText});
       });
 
 }
